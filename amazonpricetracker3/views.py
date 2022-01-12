@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from product.Product import Product
+from .product.Product import Product
 import json
 
 def home(request):
