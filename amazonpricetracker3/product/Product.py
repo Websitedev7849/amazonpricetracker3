@@ -66,5 +66,5 @@ class Product:
 
     def toString(self):
         # return self.rawData
-        return  "{" + f' "asin": "{self.asin}", "name": "{self.name}", "price" : {self.price}, "link" : "{self.link}" ' + "}"
+        return  "{" + f' "asin": "{self.asin}", "name": "{self.name}", "price" : "{self.price}", "link" : "{self.link}" ' + "}"
 
