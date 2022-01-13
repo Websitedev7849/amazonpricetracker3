@@ -59,9 +59,10 @@ class Product:
 
         price = self.soup.find("span", {"class": "a-offscreen"})
 
-        priceToReturn = price.text[1:].replace(",", "")
+        # priceToReturn = price.text[1:].replace(",", "")
+        priceToReturn = price.text[1:].replace(",", "") if price != None else "PRICE IS NONE"
 
-        return float(priceToReturn)
+        return priceToReturn
 
     def toString(self):
         # return self.rawData
