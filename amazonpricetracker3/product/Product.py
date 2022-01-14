@@ -29,15 +29,17 @@ class Product:
     def __init__(self, url):
         self.url = url
         
-        self.page = requests.get( url, headers=headers)
-        self.soup = BeautifulSoup(self.page.content, "html.parser")
-
+      
         self.rawData = self.getRawData()
 
         self.link = self.getLink()
         self.asin = self.get_asin()
         self.name = self.getName()
+
+        self.page = requests.get( self.link, headers=headers)
+        self.soup = BeautifulSoup(self.page.content, "html.parser")
         self.price = self.getPrice()
+
 
 
     
@@ -60,11 +62,11 @@ class Product:
         price = self.soup.find("span", {"class": "a-offscreen"})
 
         # priceToReturn = price.text[1:].replace(",", "")
-        priceToReturn = price.text[1:].replace(",", "") if price != None else "PRICE IS NONE"
+        priceToReturn = price.text[1:].replace(",", "") if price != None else -1
 
-        return priceToReturn
+        return float(priceToReturn)
 
     def toString(self):
         # return self.rawData
-        return  "{" + f' "asin": "{self.asin}", "name": "{self.name}", "price" : "{self.price}", "link" : "{self.link}" ' + "}"
+        return  "{" + f' "asin": "{self.asin}", "name": "{self.name}", "price" : {self.price}, "link" : "{self.link}" ' + "}"
 
