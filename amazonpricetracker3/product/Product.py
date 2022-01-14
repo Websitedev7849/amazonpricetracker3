@@ -29,33 +29,30 @@ class Product:
     def __init__(self, url):
         self.url = url
         
-      
-        self.rawData = self.getRawData()
-
-        self.link = self.getLink()
         self.asin = self.get_asin()
-        self.name = self.getName()
+        self.link = self.getLink()
 
         self.page = requests.get( self.link, headers=headers)
         self.soup = BeautifulSoup(self.page.content, "html.parser")
+        
+        self.name = self.getName()
         self.price = self.getPrice()
 
-
-
-    
-    def getRawData(self):
-        url = "https://api.rainforestapi.com/request?api_key=" + os.getenv("RAINFOREST_API_KEY") +"&type=product&url=" + self.url
-        # print(requests.get(url).text)
-        return json.loads(requests.get(url).text)
     
     def getLink(self):
-        return self.rawData["product"]["link"]
+        return "https://www.amazon.in/dp/" + self.asin
 
     def getName(self):
-        return self.rawData["product"]["title"]
+        nameTag = self.soup.find(id="productTitle")
+        return nameTag.text.strip()
     
     def get_asin(self):
-        return self.rawData["product"]["asin"]
+        u = urlparse(self.url)
+
+        # u.path.split('/)[1:] = ['Redmi-9A-Midnight-2GB-32GB', 'dp', 'B08697N43G', 'ref=lp_1389401031_1_5']
+        u = u.path.split('/')[1:]
+
+        return u[u.index("dp") + 1]
 
     def getPrice(self):
 
