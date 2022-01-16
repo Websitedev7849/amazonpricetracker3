@@ -10,6 +10,7 @@ def about(request):
 
 def getPrice(request):
     body_unicode = request.body.decode('utf-8')
+    print(body_unicode)
     body = json.loads(body_unicode)
     product = Product(body['url'])
     return HttpResponse( product.toString() )
