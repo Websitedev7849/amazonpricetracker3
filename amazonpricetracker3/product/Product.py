@@ -1,3 +1,4 @@
+from xml.dom import NotFoundErr
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -42,8 +43,11 @@ class Product:
     def getLink(self):
         return "https://www.amazon.in/dp/" + self.asin
 
+    # using soup
     def getName(self):
         nameTag = self.soup.find(id="productTitle")
+        if nameTag == None:
+            raise NotFoundErr("Name Not Found in Product.py/getName")
         return nameTag.text.strip()
     
     def get_asin(self):
@@ -54,11 +58,14 @@ class Product:
 
         return u[u.index("dp") + 1]
 
+    # using soup
     def getPrice(self):
 
         price = self.soup.find("span", {"class": "a-offscreen"})
 
-        # priceToReturn = price.text[1:].replace(",", "")
+        if price == None:
+            raise NotFoundErr("Price Not Found in Product.py/getPrice")
+
         priceToReturn = price.text[1:].replace(",", "") if price != None else -1
 
         return float(priceToReturn)

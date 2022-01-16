@@ -1,3 +1,4 @@
+from xml.dom import NotFoundErr
 from django.http import HttpResponse
 from .product.Product import Product
 import json
@@ -10,7 +11,13 @@ def about(request):
 
 def getPrice(request):
     body_unicode = request.body.decode('utf-8')
-    print(body_unicode)
-    body = json.loads(body_unicode)
-    product = Product(body['url'])
-    return HttpResponse( product.toString() )
+    try:
+        body = json.loads(body_unicode)
+        product = Product(body['url'])
+        return HttpResponse( product.toString() )
+
+    except ValueError:
+        return HttpResponse(r'{"error": 1, "errorMessage": "JsonDecode Error in views.getPrice"}')
+    
+    except NotFoundErr:
+        return HttpResponse(r'{"error": 1, "errorMessage": "NotFoundErr in views.getPrice"}')
