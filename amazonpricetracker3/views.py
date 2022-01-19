@@ -1,8 +1,12 @@
 from xml.dom import NotFoundErr
+import threading
+
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
 from .product.Product import Product
 from .utils.utils import getTime
+from .utils import db
 
 import json
 
@@ -28,4 +32,18 @@ def getPrice(request):
     
     except NotFoundErr:
         return HttpResponse(r'{"error": 1, "errorMessage": "NotFoundErr in views.getPrice"}')
+
+@csrf_exempt
+def fluctuations(request):
+    if request.method == "GET":
+        for f in db.getFluctuations():
+            print(f)
+        return HttpResponse("flucutaions are logged to console")
+
+    elif request.method == "POST":
+        for product in db.getProducts():
+            threading.Thread(target=db.getTodaysPrice, args=( product[0], )).start()
+
+        return HttpResponse("todays flucutaions are logged to console")
+        
 
