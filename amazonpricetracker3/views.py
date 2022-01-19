@@ -1,8 +1,10 @@
 from xml.dom import NotFoundErr
 from django.http import HttpResponse
+
 from .product.Product import Product
+from .utils.utils import getTime
+
 import json
-from datetime import datetime
 
 
 
@@ -13,6 +15,8 @@ def about(request):
     return HttpResponse("This is about page")
 
 def getPrice(request):
+    time = getTime()
+    print(f"time of request is {time['date']} {time['time']}")
     body_unicode = request.body.decode('utf-8')
     try:
         body = json.loads(body_unicode)
@@ -25,15 +29,3 @@ def getPrice(request):
     except NotFoundErr:
         return HttpResponse(r'{"error": 1, "errorMessage": "NotFoundErr in views.getPrice"}')
 
-def getTime():
-    time24hourformat = datetime.today().strftime('%H:%M')
-    d = datetime.strptime(time24hourformat, '%H:%M')
-    today = {
-        "date" : datetime.today().strftime('%Y-%m-%d'),
-        "time": d.strftime("%I:%M %p")
-    }
-    return today
-
-today = getTime()
-
-print(f"today's date on server is {today}")
