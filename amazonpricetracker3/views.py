@@ -2,6 +2,11 @@ from xml.dom import NotFoundErr
 from django.http import HttpResponse
 from .product.Product import Product
 import json
+from datetime import datetime
+
+today = datetime.today().strftime('%Y-%m-%d')
+
+print(f"today's date on server is {today}")
 
 def home(request):
     return HttpResponse("This is homepage")
