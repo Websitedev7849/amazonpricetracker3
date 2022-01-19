@@ -4,7 +4,7 @@ from .product.Product import Product
 import json
 from datetime import datetime
 
-today = datetime.today().strftime('%Y-%m-%d')
+today = datetime.today()
 
 print(f"today's date on server is {today}")
 
