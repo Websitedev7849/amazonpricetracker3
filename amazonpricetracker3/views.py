@@ -4,9 +4,7 @@ from .product.Product import Product
 import json
 from datetime import datetime
 
-today = datetime.today()
 
-print(f"today's date on server is {today}")
 
 def home(request):
     return HttpResponse("This is homepage")
@@ -26,3 +24,16 @@ def getPrice(request):
     
     except NotFoundErr:
         return HttpResponse(r'{"error": 1, "errorMessage": "NotFoundErr in views.getPrice"}')
+
+def getTime():
+    time24hourformat = datetime.today().strftime('%H:%M')
+    d = datetime.strptime(time24hourformat, '%H:%M')
+    today = {
+        "date" : datetime.today().strftime('%Y-%m-%d'),
+        "time": d.strftime("%I:%M %p")
+    }
+    return today
+
+today = getTime()
+
+print(f"today's date on server is {today}")
