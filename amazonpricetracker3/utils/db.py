@@ -20,6 +20,8 @@ def getFluctuations():
   cursor.execute("SELECT * FROM FLUCTUATIONS")
 
   myresult = cursor.fetchall()
+
+  cursor.close()
   
   return myresult
 
@@ -30,6 +32,8 @@ def getProducts():
 
   myresult = cursor.fetchall()
 
+  cursor.close()
+
   return myresult
 
 def isTodaysPriceRecorded(asin):
@@ -39,6 +43,7 @@ def isTodaysPriceRecorded(asin):
   cursor.execute(f"SELECT COUNT(ASIN) FROM FLUCTUATIONS WHERE ASIN = '{asin}' AND Date = '{time['date']}' ")
   
   result = cursor.fetchone()
+  cursor.close()
 
   return True if result[0] == 1 else False
 
@@ -53,5 +58,6 @@ def updateFluctuations(products):
       cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{product.get_asin()}', '{time['date']}', '{product.getPrice()}')")
       mydb.commit()
     
-    
+  cursor.close()
+  
   return cursor.rowcount
