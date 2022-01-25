@@ -1,6 +1,5 @@
 from xml.dom import NotFoundErr
-import threading
-import MySQLdb
+
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
