@@ -15,39 +15,43 @@ mydb = mysql.connector.connect(
 )
 
 def getFluctuations():
-  mycursor = mydb.cursor()
+  cursor = mydb.cursor()
 
-  mycursor.execute("SELECT * FROM FLUCTUATIONS")
+  cursor.execute("SELECT * FROM FLUCTUATIONS")
 
-  myresult = mycursor.fetchall()
+  myresult = cursor.fetchall()
   
   return myresult
 
 def getProducts():
-  mycursor = mydb.cursor()
+  cursor = mydb.cursor()
 
-  mycursor.execute("SELECT * FROM PRODUCT")
+  cursor.execute("SELECT * FROM PRODUCT")
 
-  myresult = mycursor.fetchall()
-  
+  myresult = cursor.fetchall()
+
   return myresult
 
 def isTodaysPriceRecorded(asin):
   time = getTime()
   cursor = mydb.cursor()
+  # SELECT sale_price FROM Sales WHERE EXISTS(SELECT * FROM Sales WHERE tax>150)
   cursor.execute(f"SELECT COUNT(ASIN) FROM FLUCTUATIONS WHERE ASIN = '{asin}' AND Date = '{time['date']}' ")
   
   result = cursor.fetchone()
 
   return True if result[0] == 1 else False
 
-def getTodaysPrice(asin):
+def updateFluctuations(products):
+  cursor = mydb.cursor()
 
-    product = Product(f"https://www.amazon.in/dp/{asin}")
-    print(product.toString())
-
-    """
-    Done: check if asin with products asin exists in fluctuations table
-    remember exception handling
-    if not register price
-    """
+  for p in products:
+    if(isTodaysPriceRecorded(p[0]) != True):
+      time = getTime()
+      product = Product(f"https://www.amazon.in/dp/{p[0]}")
+    
+      cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{product.get_asin()}', '{time['date']}', '{product.getPrice()}')")
+      mydb.commit()
+    
+    
+  return cursor.rowcount

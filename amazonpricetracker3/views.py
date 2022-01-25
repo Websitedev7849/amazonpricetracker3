@@ -1,5 +1,6 @@
 from xml.dom import NotFoundErr
 import threading
+import MySQLdb
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -41,9 +42,16 @@ def fluctuations(request):
         return HttpResponse("flucutaions are logged to console")
 
     elif request.method == "POST":
-        for product in db.getProducts():
-            threading.Thread(target=db.getTodaysPrice, args=( product[0], )).start()
+       
+        try:
+            rowcount = db.updateFluctuations(db.getProducts())
 
-        return HttpResponse("todays flucutaions are logged to console")
+            if(rowcount != -1):
+                return HttpResponse('{"response_status": 201, "message": "fluctuation updated succesfully"}')
+            else:
+                return HttpResponse('{"response_status": 200, "message": "fluctuation already updated"}')
+
+        except:
+            return HttpResponse('{"response_status": 500, "message": "something went wrong"}')
         
 
