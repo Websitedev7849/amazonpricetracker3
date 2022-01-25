@@ -50,7 +50,8 @@ def fluctuations(request):
             else:
                 return HttpResponse('{"response_status": 200, "message": "fluctuation already updated"}')
 
-        except:
+        except Exception as e:
+            print(e)
             return HttpResponse('{"response_status": 500, "message": "something went wrong"}')
 
 @csrf_exempt
