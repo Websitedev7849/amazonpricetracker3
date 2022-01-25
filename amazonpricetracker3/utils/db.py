@@ -49,15 +49,45 @@ def isTodaysPriceRecorded(asin):
 
 def updateFluctuations(products):
   cursor = mydb.cursor()
+  time = getTime()
 
-  for p in products:
-    if(isTodaysPriceRecorded(p[0]) != True):
-      time = getTime()
-      product = Product(f"https://www.amazon.in/dp/{p[0]}")
-    
-      cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{product.get_asin()}', '{time['date']}', '{product.getPrice()}')")
-      mydb.commit()
+  if(type(products) == list or type(products) == tuple):
+    for p in products:
+      if(isTodaysPriceRecorded(p[0]) != True):
+        product = Product(f"https://www.amazon.in/dp/{p[0]}")
+      
+        cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{product.get_asin()}', '{time['date']}', '{product.getPrice()}')")
+        mydb.commit()
+        
+  elif(type(products) == Product and isTodaysPriceRecorded(products) != True):
+    cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{products.get_asin()}', '{time['date']}', '{products.getPrice()}')")
+    mydb.commit()
+
+
     
   cursor.close()
   
+  return cursor.rowcount
+
+def isProductExists(product):
+  cursor = mydb.cursor()
+
+  cursor.execute(f'SELECT COUNT(ASIN) FROM PRODUCT WHERE ASIN = "{product.get_asin()}"')
+
+  result = cursor.fetchone()
+
+  cursor.close()
+
+  return False if result[0] == 0 else True
+
+def registerProduct(product):
+  cursor = mydb.cursor()
+
+  cursor.execute(f'INSERT INTO PRODUCT VALUES ( "{product.get_asin()}", "{product.getName()}", "{product.getLink()}" )')
+  mydb.commit()
+
+  cursor.close()
+
+  updateFluctuations(product)
+
   return cursor.rowcount

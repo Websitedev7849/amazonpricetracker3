@@ -52,5 +52,25 @@ def fluctuations(request):
 
         except:
             return HttpResponse('{"response_status": 500, "message": "something went wrong"}')
-        
 
+@csrf_exempt
+def product(request):
+    if (request.method == "POST"):
+        body_unicode = request.body.decode('utf-8')
+        try:
+            body = json.loads(body_unicode)
+            product = Product(body['url'])
+
+            if(db.isProductExists(product)):
+                return HttpResponse('{"response_status": 200, "message": "product alredy exists"}')
+            
+            rowcount = db.registerProduct(product)
+            if(rowcount != -1):
+                return HttpResponse('{"response_status": 201, "message": "product registerd succesfully"}')
+            else:
+                return HttpResponse(r'{"error": 1, "errorMessage": "product registration failed"}')
+
+        except ValueError:
+            return HttpResponse(r'{"error": 1, "errorMessage": "JsonDecode Error in views.getPrice"}')
+        
+        
