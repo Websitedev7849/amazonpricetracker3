@@ -31,7 +31,10 @@ def getPrice(request):
         return HttpResponse(r'{"error": 1, "errorMessage": "JsonDecode Error in views.getPrice"}')
     
     except NotFoundErr:
-        return HttpResponse(r'{"error": 1, "errorMessage": "NotFoundErr in views.getPrice"}')
+        # if name not found error occurs try again
+        print("recurring views.getPrice")
+        return getPrice(request)
+        # return HttpResponse(r'{"error": 1, "errorMessage": "NotFoundErr in views.getPrice"}')
 
 @csrf_exempt
 def fluctuations(request):
@@ -60,17 +63,21 @@ def product(request):
         body_unicode = request.body.decode('utf-8')
         try:
             body = json.loads(body_unicode)
-            product = Product(body['url'])
+            product1 = Product(body['url'])
 
-            if(db.isProductExists(product)):
+            if(db.isProductExists(product1)):
                 return HttpResponse('{"response_status": 200, "message": "product alredy exists"}')
             
-            rowcount = db.registerProduct(product)
+            rowcount = db.registerProduct(product1)
             if(rowcount != -1):
                 return HttpResponse('{"response_status": 201, "message": "product registerd succesfully"}')
             else:
                 return HttpResponse(r'{"error": 1, "errorMessage": "product registration failed"}')
 
+        except NotFoundErr:
+            print("reccuring views.product")
+            # if name not found error occurs try again
+            return product(request)
         except ValueError:
             return HttpResponse(r'{"error": 1, "errorMessage": "JsonDecode Error in views.getPrice"}')
         
