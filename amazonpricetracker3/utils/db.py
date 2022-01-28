@@ -1,3 +1,4 @@
+import json
 import mysql.connector
 from dotenv import load_dotenv
 from ..product.Product import Product
@@ -53,18 +54,16 @@ def updateFluctuations(products):
 
   if(type(products) == list or type(products) == tuple):
     for p in products:
-      if(isTodaysPriceRecorded(p[0]) != True):
-        product = Product(f"https://www.amazon.in/dp/{p[0]}")
-      
-        cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{product.get_asin()}', '{time['date']}', '{product.getPrice()}')")
-        mydb.commit()
+
+      product = json.loads(p)
+
+      cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{product.get('asin')}', '{time['date']}', '{product.get('price')}')")
+      mydb.commit()
         
   elif(type(products) == Product and isTodaysPriceRecorded(products) != True):
     cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{products.get_asin()}', '{time['date']}', '{products.getPrice()}')")
     mydb.commit()
 
-
-    
   cursor.close()
   
   return cursor.rowcount
@@ -91,3 +90,19 @@ def registerProduct(product):
   updateFluctuations(product)
 
   return cursor.rowcount
+
+def getFluctuationsNotRecordedOn(date):
+  cursor = mydb.cursor()
+  cursor.execute(f"""
+      SELECT PRODUCT.ASIN, PRODUCT.Name, PRODUCT.Link 
+      FROM PRODUCT WHERE 
+      PRODUCT.ASIN != 
+      ALL(SELECT FLUCTUATIONS.ASIN 
+          FROM FLUCTUATIONS 
+          WHERE Date = '{date}'
+        );
+  """)
+
+  results = cursor.fetchall()
+  cursor.close()
+  return -1 if len(results) <= 0 else results
