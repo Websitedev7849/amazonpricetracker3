@@ -1,3 +1,4 @@
+import imp
 from xml.dom import NotFoundErr
 
 
@@ -5,8 +6,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .product.Product import Product
-from .utils.utils import getTime
-from .utils import db
+from .utils import utils, db
 
 import json
 
@@ -19,7 +19,7 @@ def about(request):
     return HttpResponse("This is about page")
 
 def getPrice(request):
-    time = getTime()
+    time = utils.getTime()
     print(f"time of request is {time['date']} {time['time']}")
     body_unicode = request.body.decode('utf-8')
     try:
@@ -41,20 +41,27 @@ def fluctuations(request):
     if request.method == "GET":
         for f in db.getFluctuations():
             print(f)
-        return HttpResponse("flucutaions are logged to console")
+    
+        return HttpResponse('{"response_status":"200" ,"message":"todays Fluctuations are logged to console"}')
 
     elif request.method == "POST":
-       
-        try:
-            rowcount = db.updateFluctuations(db.getProducts())
+        time = utils.getTime()
+        result = db.getFluctuationsNotRecordedOn(time["date"])
 
-            if(rowcount != -1):
-                return HttpResponse('{"response_status": 201, "message": "fluctuation updated succesfully"}')
-            else:
-                return HttpResponse('{"response_status": 200, "message": "fluctuation already updated"}')
+        if result == -1:
+            return HttpResponse('{"error": 1 ,"message" : "todays fluctuations are already recorded"}')
 
-        except:
-            return HttpResponse('{"response_status": 500, "message": "something went wrong"}')
+        unRecordedFluctuations = []
+
+        for r in result:
+            unRecordedFluctuations.append(utils.getTodaysPrice(r[2]))
+
+        db.updateFluctuations(unRecordedFluctuations)
+        
+        print("todays Fluctuations recorded")
+    
+        return HttpResponse('{"response_status":"200" ,"message":"todays Fluctuations recorded"}')
+
 
 @csrf_exempt
 def product(request):
