@@ -27,8 +27,8 @@ def getPrice(request):
         product = Product(body['url'])
         return HttpResponse( product.toString() )
 
-    except ValueError:
-        return HttpResponse(r'{"error": 1, "errorMessage": "JsonDecode Error in views.getPrice"}')
+    except ValueError as v:
+        return HttpResponse(f'{{"error": 1, "errorMessage": "{v}"}}')
     
     except NotFoundErr:
         # if name not found error occurs try again
@@ -84,7 +84,8 @@ def product(request):
             print("reccuring views.product")
             # if name not found error occurs try again
             return product(request)
-        except ValueError:
-            return HttpResponse(r'{"error": 1, "errorMessage": "JsonDecode Error in views.getPrice"}')
+        except ValueError as v:
+            print(v)
+            return HttpResponse(f'{{"error": 1, "errorMessage": "{v}"}}')
         
         
