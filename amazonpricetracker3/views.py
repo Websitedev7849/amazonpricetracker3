@@ -87,5 +87,19 @@ def product(request):
         except ValueError as v:
             print(v)
             return HttpResponse(f'{{"error": 1, "errorMessage": "{v}"}}')
-        
+
+@csrf_exempt
+def users(request):
+    response = {
+        "message": "working on this api"
+    }
+    if(request.method == "POST"):
+        body_unicode = request.body.decode("utf-8")
+        creds = json.loads(body_unicode)
+        print(db.isUserExists(creds["username"]))
+
+    return HttpResponse(json.dumps(response))
+
+
+
         

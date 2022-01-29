@@ -121,3 +121,17 @@ def getFluctuationsNotRecordedOn(date):
   mydb.close()
 
   return -1 if len(results) <= 0 else results
+
+def isUserExists(username):
+  mydb = getDBConnector()
+  cursor = mydb.cursor()
+
+  cursor.execute(f'SELECT COUNT(*) FROM USERS WHERE UserName = "{username}"')
+
+  result = cursor.fetchone()
+  
+  cursor.close()
+  mydb.close()
+
+  return True if result[0] == 1 else False
+
