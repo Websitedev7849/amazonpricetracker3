@@ -135,3 +135,15 @@ def isUserExists(username):
 
   return True if result[0] == 1 else False
 
+def registerUser(creds):
+  mydb = getDBConnector()
+  cursor = mydb.cursor()
+
+  cursor.execute(f'INSERT INTO USERS(UserName, PWD) VALUES ("{creds["username"]}", "{creds["pwd"]}");')
+
+  mydb.commit()
+
+  cursor.close()
+  mydb.close()
+
+  return cursor.rowcount

@@ -1,4 +1,3 @@
-import imp
 from xml.dom import NotFoundErr
 from mysql.connector.errors import DatabaseError
 
@@ -91,22 +90,34 @@ def product(request):
 
 @csrf_exempt
 def users(request):
-    response = {
-        "message": "working on this api"
-    }
+   if request.method == "POST":
+        response = {
+            "message": "working on this api"
+        }
     
-    try:
-        if(request.method == "POST"):
+        try:
             body_unicode = request.body.decode("utf-8")
             creds = json.loads(body_unicode)
-            print(db.isUserExists(creds["username"]))
+            
+            if(db.isUserExists(creds["username"]) != True):
+                db.registerUser(creds)
+                response["response_status"] = 200
+                response["message"] = "user succesfully registered"
+            else:
+                response["response_status"] = 201
+                response["message"] = "user already exists"
 
             return HttpResponse(json.dumps(response))
-    except DatabaseError as de:
-        print(de)
-        response["error"] = 1
-        response["message"] = "Database error occured"
-        return HttpResponse(json.dumps(response))
+        except DatabaseError as de:
+            print(de)
+            response["error"] = 1
+            response["message"] = "Database error occured"
+            return HttpResponse(json.dumps(response))
+        except KeyError as k:
+            print(k)
+            response["error"] = 400
+            response["message"] = f'key missing : {k}'
+            return HttpResponse(json.dumps(response))
 
 
 
