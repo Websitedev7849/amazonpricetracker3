@@ -1,5 +1,6 @@
 import imp
 from xml.dom import NotFoundErr
+from mysql.connector.errors import DatabaseError
 
 
 from django.http import HttpResponse
@@ -93,12 +94,19 @@ def users(request):
     response = {
         "message": "working on this api"
     }
-    if(request.method == "POST"):
-        body_unicode = request.body.decode("utf-8")
-        creds = json.loads(body_unicode)
-        print(db.isUserExists(creds["username"]))
+    
+    try:
+        if(request.method == "POST"):
+            body_unicode = request.body.decode("utf-8")
+            creds = json.loads(body_unicode)
+            print(db.isUserExists(creds["username"]))
 
-    return HttpResponse(json.dumps(response))
+            return HttpResponse(json.dumps(response))
+    except DatabaseError as de:
+        print(de)
+        response["error"] = 1
+        response["message"] = "Database error occured"
+        return HttpResponse(json.dumps(response))
 
 
 
