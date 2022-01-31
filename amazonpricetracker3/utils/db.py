@@ -68,7 +68,7 @@ def updateFluctuations(products):
       mydb.commit()
         
   elif(type(products) == Product and isTodaysPriceRecorded(products) != True):
-    print("updating fluctuation of product with asin :" + products.get('asin'))
+    print("updating fluctuation of product with asin :" + products.get_asin())
     cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{products.get_asin()}', '{time['date']}', '{products.getPrice()}')")
     mydb.commit()
 
