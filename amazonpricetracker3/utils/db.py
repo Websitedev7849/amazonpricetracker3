@@ -1,3 +1,4 @@
+from ast import Str
 import json
 import mysql.connector
 from dotenv import load_dotenv
@@ -78,10 +79,18 @@ def updateFluctuations(products):
   return cursor.rowcount
 
 def isProductExists(product):
+
+  asin = ""
+
+  if type(product) == Product:
+    asin = product.get_asin()
+  else:
+    asin = product["asin"]
+
   mydb = getDBConnector()
   cursor = mydb.cursor()
 
-  cursor.execute(f'SELECT COUNT(ASIN) FROM PRODUCT WHERE ASIN = "{product.get_asin()}"')
+  cursor.execute(f'SELECT COUNT(ASIN) FROM PRODUCT WHERE ASIN = "{asin}"')
 
   result = cursor.fetchone()
 
@@ -94,7 +103,20 @@ def registerProduct(product):
   mydb = getDBConnector()
   cursor = mydb.cursor()
 
-  cursor.execute(f'INSERT INTO PRODUCT VALUES ( "{product.get_asin()}", "{product.getName()}", "{product.getLink()}" )')
+  asin = ""
+  name = ""
+  link = ""
+
+  if type(product) == Product:
+    asin = product.asin
+    name = product.name
+    link = product.link
+  else:
+    asin = product["asin"]
+    name = product["name"]
+    link = product["link"]
+
+  cursor.execute(f'INSERT INTO PRODUCT VALUES ( "{asin}", "{name}", "{link}" )')
   mydb.commit()
 
   cursor.close()
@@ -141,6 +163,39 @@ def registerUser(creds):
   cursor = mydb.cursor()
 
   cursor.execute(f'INSERT INTO USERS(UserName, PWD) VALUES ("{creds["username"]}", "{creds["pwd"]}");')
+
+  mydb.commit()
+
+  cursor.close()
+  mydb.close()
+
+  return cursor.rowcount
+
+def isUserValid(username, pwd):
+  # SELECT EXISTS(SELECT * FROM USERS WHERE UserName = "perrytheplatypus" AND PWD = "12345678")
+  mydb = getDBConnector()
+  cursor = mydb.cursor()
+
+  cursor.execute(f'SELECT EXISTS(SELECT * FROM USERS WHERE UserName = "{username}" AND PWD = "{pwd}")')
+
+  result = cursor.fetchone()
+
+  cursor.close()
+  mydb.close()
+
+  return True if result[0] == 1 else False
+
+def updateUsersProductTable(username, asin):
+  mydb = getDBConnector()
+  cursor = mydb.cursor()
+
+  cursor.execute(f"""
+    INSERT INTO USERSPRODUCT (UserName, ASIN)
+    VALUES (
+        "{username}",
+        "{asin}"
+    );
+  """)
 
   mydb.commit()
 

@@ -119,6 +119,66 @@ def users(request):
             response["message"] = f'key missing : {k}'
             return HttpResponse(json.dumps(response))
 
+@csrf_exempt
+def usersProduct(request):
+    if request.method == "POST":
+        response = {
+            "message": "ok"
+        }
+        try:
+            body_unicode = request.body.decode("utf-8")
+            body = json.loads(body_unicode)
+
+            product = utils.getTodaysPrice(body["link"])
+            product = json.loads(product)
+            
+            if (db.isUserValid(body["username"], body["pwd"])):
+                if (db.isProductExists(product) == False):
+                    rowcount = db.registerProduct(product)
+                    if(rowcount != -1):
+                        db.updateUsersProductTable(body["username"], product["asin"])
+                        if(db.isTodaysPriceRecorded(product["asin"])):
+                            db.updateFluctuations([product])
+                        response["response_status"] = 200
+                        response["message"] = "product registered succesfully"
+                        return HttpResponse(json.dumps(response))
+                    else:
+                        response["error"] = 500
+                        response["message"] = "prouct registration failed"
+                        return HttpResponse(json.dumps(response))
+                else:
+                    db.updateUsersProductTable(body["username"], product["asin"])
+                    if(db.isTodaysPriceRecorded(product["asin"])):
+                        db.updateFluctuations([product])
+                    response["response_status"] = 200
+                    response["message"] = "product registered succesfully"
+                    return HttpResponse(json.dumps(response))
+
+            else:
+                response["error"] = 401
+                response["message"] = "user not valid"
+                return HttpResponse(json.dumps(response))
+
+
+
+        except json.JSONDecodeError as jde:
+            print(jde)
+            response["error"] = 400
+            response["message"] = "jsonDecodeError in POST /views.usersProduct"
+            return HttpResponse(json.dumps(response))
+
+        except DatabaseError as de:
+            print(de)
+            response["error"] = 400
+            response["message"] = f"{de}"
+            return HttpResponse(json.dumps(response))
+        
+        except Exception as e:
+            print(e.__traceback__())
+            response["error"] = 400
+            response["message"] = f"{e}"
+            return HttpResponse(json.dumps(response))
+
 
 
         

@@ -10,5 +10,6 @@ urlpatterns = [
     path("getprice", views.getPrice),
     path("fluctuations", views.fluctuations),
     path("product", views.product),
-    path("users", views.users)
+    path("users", views.users),
+    path("usersproduct", views.usersProduct),
 ]
