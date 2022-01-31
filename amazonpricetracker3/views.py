@@ -133,23 +133,21 @@ def usersProduct(request):
             product = json.loads(product)
             
             if (db.isUserValid(body["username"], body["pwd"])):
-                if (db.isProductExists(product) == False):
-                    rowcount = db.registerProduct(product)
-                    if(rowcount != -1):
-                        db.updateUsersProductTable(body["username"], product["asin"])
-                        if(db.isTodaysPriceRecorded(product["asin"])):
-                            db.updateFluctuations([product])
-                        response["response_status"] = 200
-                        response["message"] = "product registered succesfully"
-                        return HttpResponse(json.dumps(response))
-                    else:
-                        response["error"] = 500
-                        response["message"] = "prouct registration failed"
-                        return HttpResponse(json.dumps(response))
+
+                if(db.isUserAndAsinExistInUsersProduct(body["username"], product["asin"]) == True):
+                    response["response_status"] = 201
+                    response["message"] = "user already registered for this product"
+                    return HttpResponse(json.dumps(response))
+
+                if (db.isProductExists(product) == False and db.registerProduct(product) == -1):
+                    print("print 1")
+                    response["error"] = 500
+                    response["message"] = "prouct registration failed"
+                    return HttpResponse(json.dumps(response))
                 else:
+                    print("print 2")
                     db.updateUsersProductTable(body["username"], product["asin"])
-                    if(db.isTodaysPriceRecorded(product["asin"])):
-                        db.updateFluctuations([product])
+                    db.updateFluctuations(product)
                     response["response_status"] = 200
                     response["message"] = "product registered succesfully"
                     return HttpResponse(json.dumps(response))
@@ -174,7 +172,7 @@ def usersProduct(request):
             return HttpResponse(json.dumps(response))
         
         except Exception as e:
-            print(e.__traceback__())
+            print(e.__traceback__)
             response["error"] = 400
             response["message"] = f"{e}"
             return HttpResponse(json.dumps(response))

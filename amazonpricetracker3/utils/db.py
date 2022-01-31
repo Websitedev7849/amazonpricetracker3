@@ -72,6 +72,11 @@ def updateFluctuations(products):
     print("updating fluctuation of product with asin :" + products.get_asin())
     cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{products.get_asin()}', '{time['date']}', '{products.getPrice()}')")
     mydb.commit()
+  
+  elif(isTodaysPriceRecorded(products["asin"]) != True):
+    print("updating fluctuation of product with asin :" + products.get('asin'))
+    cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{products.get('asin')}', '{time['date']}', '{products.get('price')}')")
+    mydb.commit()
 
   cursor.close()
   mydb.close()
@@ -203,3 +208,18 @@ def updateUsersProductTable(username, asin):
   mydb.close()
 
   return cursor.rowcount
+
+def isUserAndAsinExistInUsersProduct(username, asin):
+  mydb = getDBConnector()
+  cursor = mydb.cursor()
+
+  cursor.execute(f"""
+    SELECT EXISTS(SELECT * FROM USERSPRODUCT WHERE UserName = "{username}" AND ASIN = "{asin}");
+  """)
+
+  result = cursor.fetchone()
+
+  cursor.close()
+  mydb.close()
+
+  return False if result[0] == 0 else True
