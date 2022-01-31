@@ -63,11 +63,12 @@ def updateFluctuations(products):
     for p in products:
 
       product = json.loads(p)
-
+      print("updating fluctuation of product with asin :" + product.get('asin'))
       cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{product.get('asin')}', '{time['date']}', '{product.get('price')}')")
       mydb.commit()
         
   elif(type(products) == Product and isTodaysPriceRecorded(products) != True):
+    print("updating fluctuation of product with asin :" + products.get('asin'))
     cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{products.get_asin()}', '{time['date']}', '{products.getPrice()}')")
     mydb.commit()
 
