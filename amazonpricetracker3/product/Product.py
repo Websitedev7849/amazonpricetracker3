@@ -66,10 +66,17 @@ class Product:
         if price == None:
             raise NotFoundErr("Price Not Found in Product.py/getPrice")
 
-        priceToReturn = price.text[1:].replace(",", "") if price != None else -1
+        try:
+            priceToReturn = price.text[1:].replace(",", "") if price != None else -1
 
-        return float(priceToReturn)
+            return float(priceToReturn)
+        
+        except ValueError as e:
+            print("Error in Product.getPrice")
+            print(e)
+            return float(-1)
 
+        
     def toString(self):
         # return self.rawData
         return  "{" + f' "asin": "{self.asin}", "name": "{self.name}", "price" : {self.price}, "link" : "{self.link}" ' + "}"

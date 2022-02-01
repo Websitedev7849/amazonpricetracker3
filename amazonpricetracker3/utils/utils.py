@@ -20,6 +20,6 @@ def getTodaysPrice(link):
 
     except NotFoundErr:
         # if name not found error occurs try again
-        print("recurring utils.getTodaysprice")
+        print("recurring utils.getTodaysprice for link :" + link)
         return getTodaysPrice(link)
   

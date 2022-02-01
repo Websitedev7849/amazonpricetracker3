@@ -60,19 +60,22 @@ def updateFluctuations(products):
   cursor = mydb.cursor()
   time = getTime()
 
-  if(type(products) == list or type(products) == tuple):
+  # if tuple of json objects
+  if(type(products) == list or type(products) == tuple): 
     for p in products:
 
       product = json.loads(p)
       print("updating fluctuation of product with asin :" + product.get('asin'))
       cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{product.get('asin')}', '{time['date']}', '{product.get('price')}')")
       mydb.commit()
-        
+
+  # if Product object 
   elif(type(products) == Product and isTodaysPriceRecorded(products) != True):
-    print("updating fluctuation of product with asin :" + products.get_asin())
-    cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{products.get_asin()}', '{time['date']}', '{products.getPrice()}')")
+    print("updating fluctuation of product with asin :" + products.asin)
+    cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{products.asin}', '{time['date']}', '{products.price}')")
     mydb.commit()
   
+  # if json object
   elif(isTodaysPriceRecorded(products["asin"]) != True):
     print("updating fluctuation of product with asin :" + products.get('asin'))
     cursor.execute(f"INSERT INTO FLUCTUATIONS (ASIN, Date, Price) VALUES ('{products.get('asin')}', '{time['date']}', '{products.get('price')}')")

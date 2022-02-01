@@ -1,3 +1,4 @@
+import threading
 from xml.dom import NotFoundErr
 from mysql.connector.errors import DatabaseError
 
@@ -52,9 +53,18 @@ def fluctuations(request):
             return HttpResponse('{"error": 1 ,"message" : "todays fluctuations are already recorded"}')
 
         unRecordedFluctuations = []
+        myThreads = []
+
+        # for r in result:
+            # unRecordedFluctuations.append(utils.getTodaysPrice(r[2]))
 
         for r in result:
-            unRecordedFluctuations.append(utils.getTodaysPrice(r[2]))
+            t = threading.Thread(target=unRecordedFluctuations.append, args=( utils.getTodaysPrice(r[2]), ) )
+            t.start()
+            myThreads.append(t)
+        
+        for t in myThreads:
+            t.join()
 
         db.updateFluctuations(unRecordedFluctuations)
         
