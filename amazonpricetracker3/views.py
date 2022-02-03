@@ -3,7 +3,7 @@ from xml.dom import NotFoundErr
 from mysql.connector.errors import DatabaseError
 
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .product.Product import Product
@@ -20,114 +20,141 @@ def about(request):
     return HttpResponse("This is about page")
 
 def getPrice(request):
+
+    response = {}
+
     time = utils.getTime()
     print(f"time of request is {time['date']} {time['time']}")
     body_unicode = request.body.decode('utf-8')
     try:
         body = json.loads(body_unicode)
         product = Product(body['url'])
-        return HttpResponse( product.toString() )
+        return HttpResponse( product.toString() , status = 200)
 
     except ValueError as v:
-        return HttpResponse(f'{{"error": 1, "errorMessage": "{v}"}}')
+        print(v)
+        response["message"] = f"{v}"
+        return JsonResponse(response, status = 500)
     
     except NotFoundErr:
         # if name not found error occurs try again
         print("recurring views.getPrice")
         return getPrice(request)
-        # return HttpResponse(r'{"error": 1, "errorMessage": "NotFoundErr in views.getPrice"}')
+        
+    except KeyError as k:
+        print(k)
+        response["message"] = f'Json key missing : {k}'
+        return JsonResponse(response, status=400)
+
+    except Exception as e:
+        print(e)
+        response["message"] = f"{e}"
+        return JsonResponse(response, status = 500)
 
 @csrf_exempt
 def fluctuations(request):
     if request.method == "GET":
+        response = {}
+
         for f in db.getFluctuations():
             print(f)
-    
-        return HttpResponse('{"response_status":"200" ,"message":"todays Fluctuations are logged to console"}')
+        response["message"] = "todays Fluctuations are logged to console"
+        return JsonResponse(response, status = 200)
 
     elif request.method == "POST":
-        time = utils.getTime()
-        result = db.getFluctuationsNotRecordedOn(time["date"])
+        response = {}
+        try:
+            time = utils.getTime()
+            result = db.getFluctuationsNotRecordedOn(time["date"])
 
-        if result == -1:
-            return HttpResponse('{"error": 1 ,"message" : "todays fluctuations are already recorded"}')
+            if result == -1:
+                response["message"] = "todays fluctuations are already recorded"
+                return JsonResponse(response, status = 201)
+                
 
-        unRecordedFluctuations = []
-        myThreads = []
+            unRecordedFluctuations = []
+            myThreads = []
 
-        # for r in result:
-            # unRecordedFluctuations.append(utils.getTodaysPrice(r[2]))
+            # for r in result:
+                # unRecordedFluctuations.append(utils.getTodaysPrice(r[2]))
 
-        for r in result:
-            t = threading.Thread(target=unRecordedFluctuations.append, args=( utils.getTodaysPrice(r[2]), ) )
-            t.start()
-            myThreads.append(t)
+            for r in result:
+                t = threading.Thread(target=unRecordedFluctuations.append, args=( utils.getTodaysPrice(r[2]), ) )
+                t.start()
+                myThreads.append(t)
+            
+            for t in myThreads:
+                t.join()
+
+            db.updateFluctuations(unRecordedFluctuations)
+            
+            print("todays Fluctuations recorded")
         
-        for t in myThreads:
-            t.join()
-
-        db.updateFluctuations(unRecordedFluctuations)
-        
-        print("todays Fluctuations recorded")
-    
-        return HttpResponse('{"response_status":"200" ,"message":"todays Fluctuations recorded"}')
-
+            response["message"] = "todays Fluctuations recorded"
+            return JsonResponse(request, status = 200)
+        except Exception as e:
+            print(e)
+            response["message"] = f"{e}"
+            return JsonResponse(response, status = 500)
 
 @csrf_exempt
 def product(request):
     if (request.method == "POST"):
+        response = {}
         body_unicode = request.body.decode('utf-8')
         try:
             body = json.loads(body_unicode)
             product1 = Product(body['url'])
 
             if(db.isProductExists(product1)):
-                return HttpResponse('{"response_status": 200, "message": "product alredy exists"}')
+                response["message"] = "product already exists"
+                return JsonResponse(response, status = 201)
             
             rowcount = db.registerProduct(product1)
             if(rowcount != -1):
-                return HttpResponse('{"response_status": 201, "message": "product registerd succesfully"}')
+                response["message"] = "product registerd succesfully"
+                return JsonResponse(response, status = 201)
             else:
-                return HttpResponse(r'{"error": 1, "errorMessage": "product registration failed"}')
+                response["message"] = "product registration failed"
+                return JsonResponse(response, status = 304)
 
-        except NotFoundErr:
+        except NotFoundErr as ne:
             print("reccuring views.product")
             # if name not found error occurs try again
             return product(request)
+
         except ValueError as v:
             print(v)
-            return HttpResponse(f'{{"error": 1, "errorMessage": "{v}"}}')
+            response["message"] = f"{v}"
+            return JsonResponse(response, status = 500)
 
 @csrf_exempt
 def users(request):
    if request.method == "POST":
-        response = {
-            "message": "working on this api"
-        }
+        response = {}
     
         try:
             body_unicode = request.body.decode("utf-8")
             creds = json.loads(body_unicode)
-            
+            status = None
+
             if(db.isUserExists(creds["username"]) != True):
                 db.registerUser(creds)
-                response["response_status"] = 200
+                status = 200
                 response["message"] = "user succesfully registered"
             else:
-                response["response_status"] = 201
+                status = 201
                 response["message"] = "user already exists"
 
-            return HttpResponse(json.dumps(response))
+            return JsonResponse(response, status=status)
         except DatabaseError as de:
             print(de)
-            response["error"] = 1
             response["message"] = "Database error occured"
-            return HttpResponse(json.dumps(response))
+            return JsonResponse(response, status=500)
         except KeyError as k:
             print(k)
-            response["error"] = 400
-            response["message"] = f'key missing : {k}'
-            return HttpResponse(json.dumps(response))
+            response["message"] = f'Json key missing : {k}'
+            return JsonResponse(response, status=400)
 
 @csrf_exempt
 def usersProduct(request):
@@ -145,47 +172,40 @@ def usersProduct(request):
             if (db.isUserValid(body["username"], body["pwd"])):
 
                 if(db.isUserAndAsinExistInUsersProduct(body["username"], product["asin"]) == True):
-                    response["response_status"] = 201
                     response["message"] = "user already registered for this product"
-                    return HttpResponse(json.dumps(response))
+                    return JsonResponse(response, status = 201)
 
                 if (db.isProductExists(product) == False and db.registerProduct(product) == -1):
                     print("print 1")
-                    response["error"] = 500
                     response["message"] = "prouct registration failed"
-                    return HttpResponse(json.dumps(response))
+                    return JsonResponse(response, status = 500)
                 else:
                     print("print 2")
                     db.updateUsersProductTable(body["username"], product["asin"])
                     db.updateFluctuations(product)
-                    response["response_status"] = 200
                     response["message"] = "product registered succesfully"
-                    return HttpResponse(json.dumps(response))
+                    return JsonResponse(response, 200)
 
             else:
-                response["error"] = 401
                 response["message"] = "user not valid"
-                return HttpResponse(json.dumps(response))
+                return JsonResponse(response, status = 401)
 
 
 
         except json.JSONDecodeError as jde:
             print(jde)
-            response["error"] = 400
             response["message"] = "jsonDecodeError in POST /views.usersProduct"
-            return HttpResponse(json.dumps(response))
+            return JsonResponse(response, status = 400)
 
         except DatabaseError as de:
             print(de)
-            response["error"] = 400
             response["message"] = f"{de}"
-            return HttpResponse(json.dumps(response))
+            return JsonResponse(response, 400)
         
         except Exception as e:
-            print(e.__traceback__)
-            response["error"] = 400
+            print(e)
             response["message"] = f"{e}"
-            return HttpResponse(json.dumps(response))
+            return JsonResponse(response, status = 400)
 
 
 
