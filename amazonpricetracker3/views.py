@@ -91,7 +91,7 @@ def fluctuations(request):
             print("todays Fluctuations recorded")
         
             response["message"] = "todays Fluctuations recorded"
-            return JsonResponse(request, status = 200)
+            return JsonResponse(response, status = 200)
         except Exception as e:
             print(e)
             response["message"] = f"{e}"
