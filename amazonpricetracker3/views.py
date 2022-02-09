@@ -130,7 +130,28 @@ def product(request):
 
 @csrf_exempt
 def users(request):
-   if request.method == "POST":
+    if request.method == "GET":
+        response = {}
+
+        try:
+            body_unicode = request.body.decode("utf-8")
+            creds = json.loads(body_unicode)
+            status = None
+
+            if (db.isUserValid(creds["username"], creds["pwd"])):
+                status = 200
+                response["message"] = "USER VALID"
+            else:
+                status = 404
+                response["message"] = "USER NOT VALID"
+
+            return JsonResponse(response, status=status)
+
+        except json.JSONDecodeError as jde:
+            response["message"] = jde
+            return JsonResponse(response, status=401)
+
+    if request.method == "POST":
         response = {}
     
         try:
