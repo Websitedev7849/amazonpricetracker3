@@ -130,11 +130,12 @@ def product(request):
 
 @csrf_exempt
 def users(request):
-    if request.method == "GET":
+    if (request.method == "GET"):
         response = {}
 
         try:
             body_unicode = request.body.decode("utf-8")
+            print(body_unicode)
             creds = json.loads(body_unicode)
             status = None
 
@@ -150,8 +151,12 @@ def users(request):
         except json.JSONDecodeError as jde:
             response["message"] = jde
             return JsonResponse(response, status=401)
+        
+        except Exception as e:
+            response["message"] = e
+            return JsonResponse(response, status = 501)
 
-    if request.method == "POST":
+    if (request.method == "POST"):
         response = {}
     
         try:
