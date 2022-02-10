@@ -3,7 +3,7 @@ from xml.dom import NotFoundErr
 from mysql.connector.errors import DatabaseError
 
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, QueryDict
 from django.views.decorators.csrf import csrf_exempt
 
 from .product.Product import Product
@@ -27,26 +27,33 @@ def getPrice(request):
     print(f"time of request is {time['date']} {time['time']}")
     body_unicode = request.body.decode('utf-8')
     try:
-        body = json.loads(body_unicode)
-        product = Product(body['url'])
+
+        product = None
+
+        try:
+            body = json.loads(body_unicode)
+            product = Product(body['url'])
+
+        except ValueError:
+            queryDictUnParsed = request.META["QUERY_STRING"]
+            queryDict = QueryDict(queryDictUnParsed);
+            product = Product(queryDict["url"])
+    
         return HttpResponse( product.toString() , status = 200)
 
-    except ValueError as v:
-        print(v)
-        response["message"] = f"{v}"
-        return JsonResponse(response, status = 500)
-    
     except NotFoundErr:
         # if name not found error occurs try again
         print("recurring views.getPrice")
         return getPrice(request)
         
     except KeyError as k:
+        print("KeyError in views.getprice")
         print(k)
         response["message"] = f'Json key missing : {k}'
         return JsonResponse(response, status=400)
 
     except Exception as e:
+        print("Exeption in views.getprice")
         print(e)
         response["message"] = f"{e}"
         return JsonResponse(response, status = 500)
