@@ -144,7 +144,6 @@ def users(request):
         try:
             creds = {}
             try:
-                print(body_unicode)
                 creds = json.loads(body_unicode)
             except ValueError:
                 queryDictUnParsed = request.META["QUERY_STRING"]
