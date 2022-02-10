@@ -139,11 +139,18 @@ def product(request):
 def users(request):
     if (request.method == "GET"):
         response = {}
+        body_unicode = request.body.decode("utf-8")
 
         try:
-            body_unicode = request.body.decode("utf-8")
-            print(body_unicode)
-            creds = json.loads(body_unicode)
+            creds = {}
+            try:
+                print(body_unicode)
+                creds = json.loads(body_unicode)
+            except ValueError:
+                queryDictUnParsed = request.META["QUERY_STRING"]
+                queryDict = QueryDict(queryDictUnParsed)
+                creds = queryDict
+
             status = None
 
             if (db.isUserValid(creds["username"], creds["pwd"])):
