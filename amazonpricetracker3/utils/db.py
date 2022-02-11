@@ -226,3 +226,18 @@ def isUserAndAsinExistInUsersProduct(username, asin):
   mydb.close()
 
   return False if result[0] == 0 else True
+
+def getUsersProducts(username):
+  mydb = getDBConnector()
+  cursor = mydb.cursor()
+  cursor.execute(f"""
+      SELECT PRODUCT.ASIN, PRODUCT.Name FROM PRODUCT, 
+      USERSPRODUCT WHERE PRODUCT.ASIN = USERSPRODUCT.ASIN 
+      AND USERSPRODUCT.UserName = "{username}";
+  """)
+
+  results = cursor.fetchall()
+  cursor.close()
+  mydb.close()
+
+  return results

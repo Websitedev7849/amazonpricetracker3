@@ -156,7 +156,7 @@ def users(request):
                 status = 200
                 response["message"] = "USER VALID"
             else:
-                status = 404
+                status = 403
                 response["message"] = "USER NOT VALID"
 
             return JsonResponse(response, status=status)
@@ -197,55 +197,110 @@ def users(request):
 
 @csrf_exempt
 def usersProduct(request):
-    if request.method == "POST":
-        response = {
-            "message": "ok"
-        }
-        try:
-            body_unicode = request.body.decode("utf-8")
-            body = json.loads(body_unicode)
-
-            product = utils.getTodaysPrice(body["link"])
-            product = json.loads(product)
-            
-            if (db.isUserValid(body["username"], body["pwd"])):
-
-                if(db.isUserAndAsinExistInUsersProduct(body["username"], product["asin"]) == True):
-                    response["message"] = "user already registered for this product"
-                    return JsonResponse(response, status = 201)
-
-                if (db.isProductExists(product) == False and db.registerProduct(product) == -1):
-                    print("print 1")
-                    response["message"] = "prouct registration failed"
-                    return JsonResponse(response, status = 500)
-                else:
-                    print("print 2")
-                    db.updateUsersProductTable(body["username"], product["asin"])
-                    db.updateFluctuations(product)
-                    response["message"] = "product registered succesfully"
-                    return JsonResponse(response, 200)
-
-            else:
-                response["message"] = "user not valid"
-                return JsonResponse(response, status = 401)
-
-
-
-        except json.JSONDecodeError as jde:
-            print(jde)
-            response["message"] = "jsonDecodeError in POST /views.usersProduct"
-            return JsonResponse(response, status = 400)
-
-        except DatabaseError as de:
-            print(de)
-            response["message"] = f"{de}"
-            return JsonResponse(response, 400)
+    try:
         
-        except Exception as e:
-            print(e)
-            response["message"] = f"{e}"
-            return JsonResponse(response, status = 400)
+        if (request.method == "GET"):
+            response = {}
+            body_unicode = request.body.decode("utf-8")
 
+            try:
+                creds = {}
+                try:
+                    creds = json.loads(body_unicode)
+                except ValueError:
+                    queryDictUnParsed = request.META["QUERY_STRING"]
+                    queryDict = QueryDict(queryDictUnParsed)
+                    creds = queryDict
+
+
+                if not db.isUserValid(creds["username"], creds["pwd"]):
+                    response["message"] = "User Not Valid"
+                    return JsonResponse(response, status = 403)
+                
+                listOfProducts = db.getUsersProducts(creds["username"])
+
+                if(len(listOfProducts) <= 0):
+                    response["message"] = "No Products Registered"
+                    return JsonResponse(response, status = 204)
+                
+                listOfDicts = []
+                myDict = {
+                    "asin": "",
+                    "name": ""
+                }
+
+                for l in listOfProducts:
+                    myDict["asin"] = l[0]
+                    myDict["name"] = l[1]
+                    listOfDicts.append(myDict)
+                
+                response["message"] = "Products Found"
+                response["products"] = listOfDicts
+
+                return JsonResponse(response, status = 200)
+            
+            except json.JSONDecodeError as jde:
+                response["message"] = jde
+                return JsonResponse(response, status=401)
+            
+            except Exception as e:
+                response["message"] = e
+                return JsonResponse(response, status = 501)
+
+        if request.method == "POST":
+            response = {
+                "message": "ok"
+            }
+            try:
+                body_unicode = request.body.decode("utf-8")
+                body = json.loads(body_unicode)
+
+                product = utils.getTodaysPrice(body["link"])
+                product = json.loads(product)
+                
+                if (db.isUserValid(body["username"], body["pwd"])):
+
+                    if(db.isUserAndAsinExistInUsersProduct(body["username"], product["asin"]) == True):
+                        response["message"] = "user already registered for this product"
+                        return JsonResponse(response, status = 201)
+
+                    if (db.isProductExists(product) == False and db.registerProduct(product) == -1):
+                        print("print 1")
+                        response["message"] = "prouct registration failed"
+                        return JsonResponse(response, status = 500)
+                    else:
+                        print("print 2")
+                        db.updateUsersProductTable(body["username"], product["asin"])
+                        db.updateFluctuations(product)
+                        response["message"] = "product registered succesfully"
+                        return JsonResponse(response, 200)
+
+                else:
+                    response["message"] = "user not valid"
+                    return JsonResponse(response, status = 401)
+
+
+
+            except json.JSONDecodeError as jde:
+                print(jde)
+                response["message"] = "jsonDecodeError in POST /views.usersProduct"
+                return JsonResponse(response, status = 400)
+
+            except DatabaseError as de:
+                print(de)
+                response["message"] = f"{de}"
+                return JsonResponse(response, 400)
+            
+            except Exception as e:
+                print(e)
+                response["message"] = f"{e}"
+                return JsonResponse(response, status = 400)
+
+    except Exception as e:
+        response = {
+            "message": "Something went wrong"
+        }
+        return JsonResponse(response, status = 500)
 
 
         
