@@ -224,12 +224,10 @@ def usersProduct(request):
                     return JsonResponse(response, status = 204)
                 
                 listOfDicts = []
-                myDict = {
-                    "asin": "",
-                    "name": ""
-                }
+                
 
                 for l in listOfProducts:
+                    myDict = {}
                     myDict["asin"] = l[0]
                     myDict["name"] = l[1]
                     listOfDicts.append(myDict)
