@@ -251,6 +251,7 @@ def usersProduct(request):
             }
             try:
                 body_unicode = request.body.decode("utf-8")
+                print(body_unicode)
                 body = json.loads(body_unicode)
 
                 product = utils.getTodaysPrice(body["link"])
@@ -263,15 +264,13 @@ def usersProduct(request):
                         return JsonResponse(response, status = 201)
 
                     if (db.isProductExists(product) == False and db.registerProduct(product) == -1):
-                        print("print 1")
                         response["message"] = "prouct registration failed"
                         return JsonResponse(response, status = 500)
                     else:
-                        print("print 2")
                         db.updateUsersProductTable(body["username"], product["asin"])
                         db.updateFluctuations(product)
                         response["message"] = "product registered succesfully"
-                        return JsonResponse(response, 200)
+                        return JsonResponse(response, status=200)
 
                 else:
                     response["message"] = "user not valid"
@@ -280,16 +279,19 @@ def usersProduct(request):
 
 
             except json.JSONDecodeError as jde:
+                print("json.JSONDecodeError error in POST /usersproduct")
                 print(jde)
                 response["message"] = "jsonDecodeError in POST /views.usersProduct"
                 return JsonResponse(response, status = 400)
 
             except DatabaseError as de:
+                print("DatabaseError error in POST /usersproduct")
                 print(de)
                 response["message"] = f"{de}"
                 return JsonResponse(response, 400)
             
             except Exception as e:
+                print("Exception error in POST /usersproduct")
                 print(e)
                 response["message"] = f"{e}"
                 return JsonResponse(response, status = 400)
