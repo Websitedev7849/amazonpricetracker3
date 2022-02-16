@@ -264,15 +264,18 @@ def usersProduct(request):
 
                     if(db.isUserAndAsinExistInUsersProduct(body["username"], product["asin"]) == True):
                         response["message"] = "user already registered for this product"
+                        response["product"] = product
                         return JsonResponse(response, status = 201)
 
                     if (db.isProductExists(product) == False and db.registerProduct(product) == -1):
                         response["message"] = "prouct registration failed"
+                        response["product"] = product
                         return JsonResponse(response, status = 500)
                     else:
                         db.updateUsersProductTable(body["username"], product["asin"])
                         db.updateFluctuations(product)
                         response["message"] = "product registered succesfully"
+                        response["product"] = product
                         return JsonResponse(response, status=200)
 
                 else:
