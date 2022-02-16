@@ -30,22 +30,20 @@ def getPrice(request):
         try:
 
             product = None
-
+            productLink = None
             try:
                 body = json.loads(body_unicode)
-                product = Product(body['url'])
+                productLink = body['url']
 
             except ValueError:
                 queryDictUnParsed = request.META["QUERY_STRING"]
-                queryDict = QueryDict(queryDictUnParsed);
-                product = Product(queryDict["url"])
+                queryDict = QueryDict(queryDictUnParsed)
+                productLink = queryDict["url"]
+            
+            product = utils.getTodaysPrice(productLink)
         
-            return HttpResponse( product.toString() , status = 200)
+            return HttpResponse( product , status = 200)
 
-        except NotFoundErr:
-            # if name not found error occurs try again
-            print("recurring views.getPrice")
-            return getPrice(request)
             
         except KeyError as k:
             print("KeyError in GET /views.getprice")
