@@ -5,6 +5,7 @@ from mysql.connector.errors import DatabaseError
 
 from django.http import HttpResponse, JsonResponse, QueryDict
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.datastructures import MultiValueDictKeyError
 
 from .product.Product import Product
 from .utils import utils, db
@@ -44,7 +45,13 @@ def getPrice(request):
         
             return HttpResponse( product , status = 200)
 
-            
+        except MultiValueDictKeyError as mvdke:
+            print("MultiValueDictKeyError in GET /views.getprice")
+            print(mvdke)
+            response["message"] = f'Json key missing : {mvdke}'
+            return JsonResponse(response, status=400)
+
+
         except KeyError as k:
             print("KeyError in GET /views.getprice")
             print(k)
@@ -54,7 +61,7 @@ def getPrice(request):
         except Exception as e:
             print("Exeption in GET /views.getprice")
             print(e)
-            response["message"] = f"{e}"
+            response["message"] = f"something went wrong"
             return JsonResponse(response, status = 500)
     else:
         response = {}
@@ -65,11 +72,39 @@ def getPrice(request):
 def fluctuations(request):
     if request.method == "GET":
         response = {}
+        try:
+            queryDictUnparsed = request.META["QUERY_STRING"]
+            queryDict = QueryDict(queryDictUnparsed)
 
-        for f in db.getFluctuations():
-            print(f)
-        response["message"] = "todays Fluctuations are logged to console"
-        return JsonResponse(response, status = 200)
+            if(queryDict.get("asin") == None):
+                response["message"] = "asin param missing in query string"
+                return JsonResponse(response, status = 400)
+
+            myFluctutaions = db.getFluctuations(queryDict.get("asin"))
+           
+            
+            if(len(myFluctutaions) <= 0):
+                response["message"] = "No Fluctuations Found"
+                return JsonResponse(response, status = 404)
+            
+            dbResponse = []
+
+            for f in myFluctutaions:
+                fluctuationDict = {}
+                fluctuationDict["date"] = f[2]
+                fluctuationDict["price"] = f[3]
+                dbResponse.append(fluctuationDict)
+            
+            response["message"] = "Flucutions found"
+            response["fluctuations"] = dbResponse
+            return JsonResponse(response, status = 200)
+
+
+
+        except Exception as e:
+            print("Exception occured in GET /views.fluctutation")
+            response["message"] = e
+            return JsonResponse(response, status = 500)
 
     elif request.method == "POST":
         response = {}

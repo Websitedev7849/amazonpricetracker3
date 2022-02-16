@@ -18,11 +18,15 @@ def getDBConnector():
   database = os.getenv("MYSQL_DATABASE")
 )
 
-def getFluctuations():
+def getFluctuations(asin):
   mydb = getDBConnector()
   cursor = mydb.cursor()
 
-  cursor.execute("SELECT * FROM FLUCTUATIONS")
+  cursor.execute(f"""
+    SELECT * FROM FLUCTUATIONS WHERE 
+    ASIN = "{asin}" ORDER BY Date DESC ;
+  
+  """)
 
   myresult = cursor.fetchall()
 
