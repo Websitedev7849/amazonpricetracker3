@@ -92,7 +92,7 @@ def fluctuations(request):
             for f in myFluctutaions:
                 fluctuationDict = {}
                 fluctuationDict["date"] = f[2]
-                fluctuationDict["price"] = f[3]
+                fluctuationDict["price"] = float(f[3])
                 dbResponse.append(fluctuationDict)
             
             response["message"] = "Flucutions found"
