@@ -22,4 +22,4 @@ def getTodaysPrice(link):
         # if name not found error occurs try again
         print("recurring utils.getTodaysprice for link :" + link)
         return getTodaysPrice(link)
-  
+    

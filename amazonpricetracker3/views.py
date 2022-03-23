@@ -120,8 +120,6 @@ def fluctuations(request):
             unRecordedFluctuations = []
             myThreads = []
 
-            # for r in result:
-                # unRecordedFluctuations.append(utils.getTodaysPrice(r[2]))
 
             for r in result:
                 t = threading.Thread(target=unRecordedFluctuations.append, args=( utils.getTodaysPrice(r[2]), ) )

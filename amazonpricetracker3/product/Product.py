@@ -34,17 +34,20 @@ class Product:
         self.link = self.getLink()
 
         self.page = requests.get( self.link, headers=headers)
+        self.statusCode = self.getStatusCode()
         self.soup = BeautifulSoup(self.page.content, "html.parser")
         
         self.name = self.getName()
         self.price = self.getPrice()
 
-    
     def getLink(self):
         return "https://www.amazon.in/dp/" + self.asin
 
     # using soup
     def getName(self):
+        if(self.statusCode == 404):
+            return "Not Found"
+        
         nameTag = self.soup.find(id="productTitle")
         if nameTag == None:
             raise NotFoundErr("Name Not Found in Product.py/getName")
@@ -60,6 +63,8 @@ class Product:
 
     # using soup
     def getPrice(self):
+        if(self.statusCode == 404):
+            return float(-1)
 
         price = self.soup.find("span", {"class": "a-offscreen"})
 
@@ -76,6 +81,8 @@ class Product:
             print(e)
             return float(-1)
 
+    def getStatusCode(self):
+        return self.page.status_code
         
     def toString(self):
         # return self.rawData
