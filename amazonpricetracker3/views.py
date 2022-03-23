@@ -292,6 +292,10 @@ def usersProduct(request):
 
                 product = utils.getTodaysPrice(body["link"])
                 product = json.loads(product)
+
+                if(product["statusCode"] == 404):
+                    response["message"] = "product not found"
+                    return JsonResponse(response, status = 404)
                 
                 if (db.isUserValid(body["username"], body["pwd"])):
 
