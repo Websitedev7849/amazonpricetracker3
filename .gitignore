@@ -2,4 +2,3 @@
 __pycache__/
 ./amazonpricetracker3/product/__pycache__/
 *.pyc
-*.sql

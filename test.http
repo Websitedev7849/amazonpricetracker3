@@ -1,0 +1,118 @@
+GET https://api.rainforestapi.com/request?api_key=C13087B5D28F4EEDA8C2268C41A48F7D&type=product&url=https%3A%2F%2Fwww.amazon.in%2Fdp%2FB09DSSYDCL%2Fref%3Dcm_sw_em_r_mt_dp_XRV4VA8G2HS1RBWJYB9G
+
+
+###
+GET http://127.0.0.1:8000/getprice?url=https://www.amazon.in/dp/B09DL6DTYH/
+
+###
+GET http://127.0.0.1:8000/getprice
+
+{
+    "url": "https://www.amazon.in/Master-Diamond-Office-Revolving-Umbrella/dp/B099S1MMJL/"
+}
+
+###
+GET http://127.0.0.1:8000/fluctuations?asin=B08B44K4YS
+
+###
+POST http://127.0.0.1:8000/fluctuations
+
+###
+POST http://127.0.0.1:8000/product
+
+{
+    "url": "https://www.amazon.in/Fortune-Rozana-Basmati-Rice-5kg/dp/B00YGMM2MM/"
+}
+
+
+###
+GET http://127.0.0.1:8000/users?username=heinzdof&pwd=123456789
+
+###
+GET http://127.0.0.1:8000/users
+
+{
+    "pwd": "123456789",
+    "username": "heinzdoof"
+}
+
+
+###
+POST http://127.0.0.1:8000/users
+
+{
+    "username": "heinzdoof",
+    "pwd": "123456789"
+}
+
+###
+POST http://127.0.0.1:8000/usersproduct
+
+{
+    "username": "phineasflynn",
+    "pwd": "12345678",
+    "link": "https://www.amazon.in/iQOO-Storage-Processor-FlashCharge-Replacement/dp/B07WHS6QT7/"
+}
+
+###
+GET http://127.0.0.1:8000/usersproduct?username=perrytheplatypus&pwd=12345678
+
+###
+GET https://amazonpricetracker3.herokuapp.com/getprice?url=https://www.amazon.in/dp/B09DL6DTYH/
+
+
+###
+GET https://amazonpricetracker3.herokuapp.com/getprice
+
+{
+    "url": "https://www.amazon.in/New-Apple-iPhone-Pro-256GB/dp/B08L5T44CQ/"
+}
+
+###
+GET https://amazonpricetracker3.herokuapp.com/fluctuations?asin=B08B44K4YS
+
+###
+POST https://amazonpricetracker3.herokuapp.com/fluctuations
+
+###
+POST https://amazonpricetracker3.herokuapp.com/product
+
+{
+    "url": "https://www.amazon.in/Tata-Sampann-Besan-1kg/dp/B077X87TTS/"
+}
+
+###
+GET https://amazonpricetracker3.herokuapp.com/users?username=heinzdoof&pwd=123456789
+
+###
+GET https://amazonpricetracker3.herokuapp.com/users
+
+{
+    "username": "heinzdoof",
+    "pwd": "123456789"
+}
+
+
+###
+POST https://amazonpricetracker3.herokuapp.com/users
+
+{
+    "username": "heinzoof",
+    "pwd": "123456789"
+}
+
+###
+POST https://amazonpricetracker3.herokuapp.com/usersproduct
+
+{
+    "username": "phineasflynn",
+    "pwd": "12345678",
+    "link": "https://www.amazon.in/dp/B094NS2K5J/"
+}
+
+###
+GET https://amazonpricetracker3.herokuapp.com/usersproduct?username=siddharth@2001&pwd=12345678
+
+###
+GET https://api.rainforestapi.com/request?api_key=C13087B5D28F4EEDA8C2268C41A48F7D&type=product&url=https://www.amazon.in/dp/B07NZ419KZ/ref=sspa_dk_detail_1?psc=1&pd_rd_i=B07NZ419KZ&pd_rd_w=cjKDY&pf_rd_p=4e9225d2-7473-4eb0-95d5-670190275218&pd_rd_wg=WGgtG&pf_rd_r=G1SRT9G9A02GAXKF0EWD&pd_rd_r=51f48ee7-2412-4f37-8b35-c7aebe6b5344&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUEyWVVDUkNMNFFFV1I2JmVuY3J5cHRlZElkPUEwMDM3MTQzS0tNMlk3QkowQkEyJmVuY3J5cHRlZEFkSWQ9QTAxMTcwOTYyVFNIVzY0STU3UkFCJndpZGdldE5hbWU9c3BfZGV0YWlsJmFjdGlvbj1jbGlja1JlZGlyZWN0JmRvTm90TG9nQ2xpY2s9dHJ1ZQ==
+
